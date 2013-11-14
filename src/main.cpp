@@ -69,14 +69,14 @@ int main(void)
 	Emitter emitter;
 	Subscriber subscriber;
 
-	Any gogo = [](int a, float b)
+	Any gogo = std::function<void(int, float)>([](int a, float b)
 	{
 		std::cout << "lol : " << a << " hahaha " << b << std::endl;
 		a = 24;
-	};
+	});
 
 	subscriber.subscribe("key", gogo);
 
-	emitter.emit("key", 21, 42.0f);
+	emitter.emit("key", 21, 42);
 	return 0;
 }

@@ -24,9 +24,8 @@ struct Emitter
 		auto &f = database.find(s);
 		if (f == std::end(database))
 			return;
-		auto *t = f->second.getData<std::function<void (Types...)> >();
-		std::function<void(Types...)> lol = t->data;
-		(t->data)(types...);
+		auto fun = f->second.get<std::function<void(Types...)> >();
+		fun(types...);
 	}
 };
 

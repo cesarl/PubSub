@@ -73,12 +73,6 @@ public:
 	}
 
 	template<typename T>
-	Data<T> *getData()
-	{
-		return (static_cast<Data<T> *>(_data.get()));
-	}
-
-	template<typename T>
 	operator T() const
 	{
 		return (static_cast<Data<T>* >(_data.get()))->get();
