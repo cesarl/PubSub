@@ -35,10 +35,6 @@
 
 int main(void)
 {
-	IData *f = new Data<float>(0.42f);
-	static_cast<Data<float>*>(f)->data = 10.0f;
-	Data<float> *convertedF = static_cast<Data<float>*>(f);
-
 	Any g = 1212;
 
 	int h = g;

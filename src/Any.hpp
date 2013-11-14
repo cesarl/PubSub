@@ -1,0 +1,78 @@
+#ifndef   __ANY_HPP__
+# define  __ANY_HPP__
+
+#include <memory>
+#include <functional>
+
+class Any
+{
+
+/////////////////////////
+// IData struct
+/////////////////////////
+
+struct IData
+{
+	IData(){}
+	virtual ~IData(){}
+};
+
+/////////////////////////
+// Data struct
+/////////////////////////
+
+template <typename T>
+struct Data : public IData
+{
+	T data;
+
+	Data(T d)
+		: data(d)
+	{}
+
+	virtual ~Data()
+	{}
+
+	T get()
+	{
+		return data;
+	}
+
+	T& operator=(T &d)
+	{
+		data = d;
+		return d;
+	}
+};
+
+
+/////////////////////////////
+// Any class implementation
+/////////////////////////////
+
+private:
+	std::shared_ptr<IData> _data;
+public:
+	template<typename T>
+	Any(T d)
+		: _data(new Data<T>(d))
+	{}
+
+	~Any()
+	{
+	}
+
+	template<typename T>
+	T get()
+	{
+		return static_cast<T>(_data).get();
+	}
+
+	template<typename T>
+	operator T() const
+	{
+		return (static_cast<Data<T>* >(_data.get()))->get();
+	}
+};
+
+#endif    //!__ANY_HPP__

@@ -2,9 +2,9 @@
 # define  __PUBLISHER_HPP__
 
 #include <vector>
-#include <memory>
-#include <functional>
 #include <algorithm>
+
+#include "Any.hpp"
 
 //namespace PubSub
 //{
@@ -74,61 +74,6 @@
 //	};
 //};
 
-struct IData
-{
-	IData(){}
-	virtual ~IData(){}
-};
 
-template <typename T>
-struct Data : public IData
-{
-	T data;
-
-	Data(T d)
-		: data(d)
-	{}
-
-	virtual ~Data()
-	{}
-
-	T get()
-	{
-		return data;
-	}
-
-	T& operator=(T &d)
-	{
-		data = d;
-		return d;
-	}
-};
-
-class Any
-{
-private:
-	std::shared_ptr<IData> _data;
-public:
-	template<typename T>
-	Any(T d)
-		: _data(new Data<T>(d))
-	{}
-
-	~Any()
-	{
-	}
-
-	template<typename T>
-	T get()
-	{
-		return static_cast<T>(_data).get();
-	}
-
-	template<typename T>
-	operator T() const
-	{
-		return (static_cast<Data<T>* >(_data.get()))->get();
-	}
-};
 
 #endif    //__PUBLISHER_HPP__

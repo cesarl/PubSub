@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Any.hpp" />
     <ClInclude Include="Publisher.hpp" />
   </ItemGroup>
   <ItemGroup>
