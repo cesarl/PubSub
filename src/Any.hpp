@@ -51,7 +51,7 @@ struct Data : public IData
 // Any class implementation
 /////////////////////////////
 
-private:
+public:
 	std::shared_ptr<IData> _data;
 public:
 	template<typename T>

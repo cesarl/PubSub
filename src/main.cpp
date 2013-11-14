@@ -12,42 +12,45 @@ void testFunc(const std::string &a, int b)
 	std::cout << a << " et " << b << std::endl;
 }
 
+class Test
+{
+public:
+	void testFunc(unsigned int a, bool b, const std::string &c)
+	{
+		std::cout << "member testfunc said : " << a << " " << b << " " << c << std::endl;
+	}
+	float testFunc2(bool b, const std::string &c)
+	{
+		std::cout << "member testfunc said :" << " " << b << " " << c << std::endl;
+		return 12.0f;
+	}
+};
+
+
+using namespace std::placeholders;
+
 int main(void)
 {
+
+	PubSub::getInstance().subscribe(std::shared_ptr<Any>(new Any(std::function<void(const std::string &, int)>(
+		[](const std::string &a, int b)
 	{
-		Any g = 1212;
-		int h = g;
-		g = 4242;
-		int gValue = g;
+		std::cout << "lol : " << a << " and : " << b << std::endl;
 	}
-	
-	////
-	////
-	////
+	))), "test1");
 
-	std::vector<Any> vec;
-	Any a1 = std::string("lol");
-	Any a2 = 42;
-	vec.push_back(a1);
-	vec.push_back(a2);
+	Test classTest;
 
-	testFunc(vec[0], vec[1]);
+	std::shared_ptr<Any> t(new Any(std::bind(&Test::testFunc, &classTest, _1, _2, _3)));
+	PubSub::getInstance().subscribe(t, "test2");
 
+	PubSub::getInstance().publish("test1", std::string("coucou !"), 21);
+//	PubSub::getInstance().publish("test2", 42, false, std::string("Ho yeah !"));
 
-	////
-	////
-	////
+	MyListener mylistener;
 
-	Emitter emitter;
-	Subscriber subscriber;
-
-	subscriber.subscribe("key", std::function<void(int, float)>([](int a, float b)
-	{
-		std::cout << "lol : " << a << " hahaha " << b << std::endl;
-	}));
-
-	emitter.emit("key", 21, 42.0f);
-	emitter.emit("test", 123, 123);
+	PubSub::getInstance().sub("sub1", &MyListener::visit, &mylistener);
+	PubSub::getInstance().pub("sub1", 42, false, 42.42f);
 
 	return 0;
 }

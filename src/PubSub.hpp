@@ -7,8 +7,18 @@
 #include "Any.hpp"
 #include "Singleton.hpp"
 
+
+struct MyListener
+{
+	void visit(unsigned int a, bool b, float c)
+	{
+		std::cout << a << " " << b << " " << c << std::endl;
+	}
+};
+
 class PubSub : public Singleton<PubSub>
 {
+	std::map<std::string, Any*> _map;
 public:
 	void subscribe(std::shared_ptr<Any> obj, const std::string &key)
 	{
@@ -19,6 +29,19 @@ public:
 			set = _list.find(key);
 		}
 		set->second.insert(obj);
+	}
+
+	template <typename Fun, typename Obj>
+	void sub(const std::string &key, Fun f, Obj *o)
+	{
+		_map.insert(std::make_pair(key, new Any(f)));
+	}
+
+	template <typename ...Types>
+	void pub(const std::string &key, Types... types)
+	{
+//		auto fun = _map[key]->get<std::function<void(Types...)> >();
+//		std::function<void(Types...)> fun = *(_map[key]);
 	}
 
 	void unsubscribe(std::shared_ptr<Any> obj, const std::string &key)
@@ -37,7 +60,7 @@ public:
 			return;
 		for (auto &e : set->second)
 		{
-			auto fun = e.get<std::function<void(Types...)> >();
+			auto fun = e.get()->get<std::function<void(Types...)> >();
 			fun(types...);
 		}
 	}
