@@ -6,11 +6,29 @@
 
 #include "Any.hpp"
 
+std::map<std::string, Any> database;
+
 struct Subscriber
-{};
+{
+	void subscribe(const std::string &s, Any &callback)
+	{
+		database.insert(std::make_pair(s, callback));
+	}
+};
 
 struct Emitter
-{};
+{
+	template <typename ...Types>
+	void emit(const std::string &s, Types... types)
+	{
+		auto &f = database.find(s);
+		if (f == std::end(database))
+			return;
+		auto *t = f->second.getData<std::function<void (Types...)> >();
+		std::function<void(Types...)> lol = t->data;
+		(t->data)(types...);
+	}
+};
 
 
 

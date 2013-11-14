@@ -6,7 +6,7 @@
 
 class Any
 {
-
+public:
 /////////////////////////
 // IData struct
 /////////////////////////
@@ -26,14 +26,15 @@ struct Data : public IData
 {
 	T data;
 
-	Data(T d)
+	Data(const T &d)
 		: data(d)
-	{}
+	{
+	}
 
 	virtual ~Data()
 	{}
 
-	T get()
+	T &get()
 	{
 		return data;
 	}
@@ -66,9 +67,15 @@ public:
 	}
 
 	template<typename T>
-	T &get()
+	T get()
 	{
-		return static_cast<T>(_data).get();
+		return (static_cast<Data<T>* >(_data.get()))->get();
+	}
+
+	template<typename T>
+	Data<T> *getData()
+	{
+		return (static_cast<Data<T> *>(_data.get()));
 	}
 
 	template<typename T>

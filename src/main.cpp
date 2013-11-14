@@ -61,5 +61,22 @@ int main(void)
 
 	testFunc(vec[0], vec[1]);
 
+
+	////
+	////
+	////
+
+	Emitter emitter;
+	Subscriber subscriber;
+
+	Any gogo = [](int a, float b)
+	{
+		std::cout << "lol : " << a << " hahaha " << b << std::endl;
+		a = 24;
+	};
+
+	subscriber.subscribe("key", gogo);
+
+	emitter.emit("key", 21, 42.0f);
 	return 0;
 }
