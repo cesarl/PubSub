@@ -12,7 +12,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Any.hpp" />
-    <ClInclude Include="Publisher.hpp" />
+    <ClInclude Include="PubSub.hpp" />
+    <ClInclude Include="Singleton.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />

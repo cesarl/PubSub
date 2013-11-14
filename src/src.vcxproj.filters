@@ -15,10 +15,13 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Publisher.hpp">
+    <ClInclude Include="Any.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Any.hpp">
+    <ClInclude Include="Singleton.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PubSub.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

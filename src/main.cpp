@@ -2,35 +2,7 @@
 #include <string>
 #include <iostream>
 
-#include "Publisher.hpp"
-
-
-//int main(void)
-//{
-//	std::map<std::string, PubSub::SubjectBase> test;
-//
-//	PubSub::Subject<void (void)> sub1;
-//	PubSub::Subject<void (int&, float)> sub2;
-//
-//	test.insert(std::make_pair("sub1", sub1));
-//	test.insert(std::make_pair("sub2", sub2));
-//
-//	auto l1 = sub1.registerObserver([] (void)
-//	{
-//		std::cout << "coucou" << std::endl;
-//	});
-//
-//	auto l2 = sub2.registerObserver([] (int &a, float b)
-//	{
-//		std::cout << "lol : " << a << " hahaha " << b << std::endl;
-//		a = 24;
-//	});
-//
-//	int a = 0;
-//
-//	sub1();
-//	sub2(a, 4.1);
-//}
+#include "PubSub.hpp"
 
 #include <vector>
 #include <string>
@@ -69,14 +41,13 @@ int main(void)
 	Emitter emitter;
 	Subscriber subscriber;
 
-	Any gogo = std::function<void(int, float)>([](int a, float b)
+	subscriber.subscribe("key", std::function<void(int, float)>([](int a, float b)
 	{
 		std::cout << "lol : " << a << " hahaha " << b << std::endl;
-		a = 24;
-	});
+	}));
 
-	subscriber.subscribe("key", gogo);
+	emitter.emit("key", 21, 42.0f);
+	emitter.emit("test", 123, 123);
 
-	emitter.emit("key", 21, 42);
 	return 0;
 }
