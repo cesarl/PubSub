@@ -76,6 +76,8 @@
 
 struct IData
 {
+	IData(){}
+	virtual ~IData(){}
 };
 
 template <typename T>
@@ -105,7 +107,7 @@ struct Data : public IData
 class Any
 {
 private:
-	IData *_data;
+	std::shared_ptr<IData> _data;
 public:
 	template<typename T>
 	Any(T d)
@@ -113,7 +115,8 @@ public:
 	{}
 
 	~Any()
-	{}
+	{
+	}
 
 	template<typename T>
 	T get()
@@ -124,7 +127,7 @@ public:
 	template<typename T>
 	operator T() const
 	{
-		return (static_cast<Data<T>* >(_data))->get();
+		return (static_cast<Data<T>* >(_data.get()))->get();
 	}
 };
 
