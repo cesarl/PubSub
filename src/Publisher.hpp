@@ -6,6 +6,14 @@
 
 #include "Any.hpp"
 
+struct Subscriber
+{};
+
+struct Emitter
+{};
+
+
+
 //namespace PubSub
 //{
 //	using Registration = std::shared_ptr<void>;

@@ -58,18 +58,27 @@ public:
 		: _data(new Data<T>(d))
 	{}
 
-	~Any()
+	~Any(){}
+
+	Any(const Any &o)
 	{
+		_data = o._data;
 	}
 
 	template<typename T>
-	T get()
+	T &get()
 	{
 		return static_cast<T>(_data).get();
 	}
 
 	template<typename T>
 	operator T() const
+	{
+		return (static_cast<Data<T>* >(_data.get()))->get();
+	}
+
+	template<typename T>
+	T& operator=(T &d)
 	{
 		return (static_cast<Data<T>* >(_data.get()))->get();
 	}

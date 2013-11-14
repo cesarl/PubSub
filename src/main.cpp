@@ -32,16 +32,34 @@
 //	sub2(a, 4.1);
 //}
 
+#include <vector>
+#include <string>
+
+void testFunc(const std::string &a, int b)
+{
+	std::cout << a << " et " << b << std::endl;
+}
 
 int main(void)
 {
-	Any g = 1212;
+	{
+		Any g = 1212;
+		int h = g;
+		g = 4242;
+		int gValue = g;
+	}
+	
+	////
+	////
+	////
 
-	int h = g;
+	std::vector<Any> vec;
+	Any a1 = std::string("lol");
+	Any a2 = 42;
+	vec.push_back(a1);
+	vec.push_back(a2);
 
-	g = 4242;
-
-	int gValue = g;
+	testFunc(vec[0], vec[1]);
 
 	return 0;
 }
