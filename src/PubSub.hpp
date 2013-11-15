@@ -79,9 +79,12 @@ public:
 
 	void unsub(const std::string &key)
 	{
-		if (_callbacks.find(key) == std::end(_callbacks))
-			return;
-		delete static_cast<std::function<void()>*>(_callbacks[key].function);
+		if (_callbacks.find(key) != std::end(_callbacks))
+		{
+			delete static_cast<std::function<void()>*>(_callbacks[key].function);
+			_callbacks.erase(key);
+		}
+		removeFromGlobalCallbacks(key);
 	}
 
 	template <typename ...Args>
@@ -102,11 +105,13 @@ public:
 	static void broadcast(std::string name, Args ...args)
 	{
 		auto set = _allCallbacks.find(name);
-		if (set == std::end(_allCallbacks))
+		if (set == std::end(_allCallbacks) || set->second.empty())
 			return;
-		for (auto it = std::begin(set->second); it != std::end(set->second); ++it)
+		for (auto it = std::begin(set->second); it != std::end(set->second); )
 		{
-			(*it)->pub(name, args...);
+			auto e = *it;
+			++it;
+			e->pub(name, args...);
 		}
 	}
 
@@ -127,6 +132,14 @@ private:
 				continue;
 			_allCallbacks[e.first].erase(this);
 		}
+	}
+
+	void removeFromGlobalCallbacks(const std::string &key)
+	{
+		if (_allCallbacks.find(key) == std::end(_allCallbacks))
+			return;
+		_allCallbacks[key].erase(this);
+
 	}
 	std::map<std::string, Callback> _callbacks;
 };

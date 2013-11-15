@@ -33,8 +33,10 @@ int main(void)
 	test2.sub("test", [&](int a, int b)
 	{
 		test2.LogInt(a, b);
+		test2.unsub("test");
 	});
 //	PubSub::clearAll();
 	PubSub::broadcast("test", 3, 4);
+	PubSub::broadcast("test", 5, 6);
 	return 0;
 }
