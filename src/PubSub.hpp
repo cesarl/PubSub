@@ -6,8 +6,6 @@
 #include <map>
 
 #include "Any.hpp"
-#include "Singleton.hpp"
-
 
 template <typename F>
 struct MyFunc : public MyFunc<decltype(&F::operator())>
@@ -35,7 +33,7 @@ toFn(F &lambda)
 	return static_cast<typename MyFunc<F>::function>(lambda);
 }
 
-class PubSub : public Singleton<PubSub>
+class PubSub
 {
 private:
 	struct Callback
@@ -44,6 +42,14 @@ private:
 		const std::type_info *signature;
 	};
 public:
+	void clearAll()
+	{
+		for (auto &e : _allCallbacks)
+		{
+			delete static_cast<std::function<void()>*>(e.second.function);
+		}
+	}
+
 	void clear()
 	{
 		for (auto &e : _callbacks)
@@ -82,15 +88,14 @@ public:
 		}
 		(*function)(args...);
 	}
-private:
 	PubSub(){}
 	virtual ~PubSub()
 	{
 		clear();
 	}
-
+private:
 	std::map<std::string, Callback> _callbacks;
-	friend class Singleton<PubSub>;
+	static std::multimap<std::string, Callback> _allCallbacks;
 };
 
 #endif    //__PUBLISHER_HPP__
