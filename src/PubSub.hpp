@@ -1,5 +1,5 @@
-#ifndef   __PUBLISHER_HPP__
-# define  __PUBLISHER_HPP__
+#ifndef   __PUBSUB_HPP__
+# define  __PUBSUB_HPP__
 
 #include <algorithm>
 #include <unordered_set>
@@ -144,4 +144,4 @@ private:
 	std::map<std::string, Callback> _callbacks;
 };
 
-#endif    //__PUBLISHER_HPP__
+#endif    //__PUBSUB_HPP__
