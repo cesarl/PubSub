@@ -21,19 +21,20 @@ struct Test : public PubSub
 int main(void)
 {
 	Test test1;
-	test1.sub("test", [](int b, float c, bool d)
+	test1.sub("test", [](int a, int b)
 	{
-		std::cout << " " << b << " " << c << " " << d << std::endl;
+		std::cout << " " << a << " " << b << std::endl;
 	});
 
-	test1.pub("test", 42, 12.34f, false);
+	test1.pub("test", 1, 2);
 
 	Test test2;
 	test2.name = "KikooLol";
-	test2.sub("testTest", [&](int a, int b)
+	test2.sub("test", [&](int a, int b)
 	{
 		test2.LogInt(a, b);
 	});
-	test2.pub("testTest", 21, 42);
+//	PubSub::clearAll();
+	PubSub::broadcast("test", 3, 4);
 	return 0;
 }

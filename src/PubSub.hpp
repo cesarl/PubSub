@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <unordered_set>
 #include <map>
+#include <unordered_set>
 
 #include "Any.hpp"
 
@@ -35,26 +36,31 @@ toFn(F &lambda)
 
 class PubSub
 {
-private:
+public:
 	struct Callback
 	{
 		void *function;
 		const std::type_info *signature;
 	};
 public:
-	void clearAll()
-	{
-		for (auto &e : _allCallbacks)
-		{
-			delete static_cast<std::function<void()>*>(e.second.function);
-		}
-	}
-
-	void clear()
+	void clearSubscriptions()
 	{
 		for (auto &e : _callbacks)
 		{
 			delete static_cast<std::function<void()>*>(e.second.function);
+		}
+		_callbacks.clear();
+	}
+
+	static void clearAll()
+	{
+		for (auto &e : _allCallbacks)
+		{
+			for (auto &o : e.second)
+			{
+				o->clearSubscriptions();
+			}
+			e.second.clear();
 		}
 	}
 
@@ -66,6 +72,9 @@ public:
 		auto fn = new decltype(toFn(lambda))(toFn(lambda));
 		_callbacks[key].function = static_cast<void*>(fn);
 		_callbacks[key].signature = &typeid(fn);
+		if (_allCallbacks.find(key) == std::end(_allCallbacks))
+			_allCallbacks.emplace(key, std::unordered_set<PubSub*>());
+		_allCallbacks[key].insert(this);
 	}
 
 	void unsub(const std::string &key)
@@ -88,14 +97,38 @@ public:
 		}
 		(*function)(args...);
 	}
+
+	template <typename ...Args>
+	static void broadcast(std::string name, Args ...args)
+	{
+		auto set = _allCallbacks.find(name);
+		if (set == std::end(_allCallbacks))
+			return;
+		for (auto it = std::begin(set->second); it != std::end(set->second); ++it)
+		{
+			(*it)->pub(name, args...);
+		}
+	}
+
 	PubSub(){}
 	virtual ~PubSub()
 	{
-		clear();
+		removeFromGlobalCallbacks();
+		clearSubscriptions();
 	}
+
+	static std::map<std::string, std::unordered_set<PubSub*> > _allCallbacks;
 private:
+	void removeFromGlobalCallbacks()
+	{
+		for (auto &e : _callbacks)
+		{
+			if (_allCallbacks.find(e.first) == std::end(_allCallbacks))
+				continue;
+			_allCallbacks[e.first].erase(this);
+		}
+	}
 	std::map<std::string, Callback> _callbacks;
-	static std::multimap<std::string, Callback> _allCallbacks;
 };
 
 #endif    //__PUBLISHER_HPP__
