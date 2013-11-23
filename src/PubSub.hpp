@@ -4,9 +4,11 @@
 #include <algorithm>
 #include <unordered_set>
 #include <map>
-#include <unordered_set>
+#include <unordered_map>
 
 #include "Any.hpp"
+
+typedef std::string PubSubKey;
 
 template <typename F>
 struct MyFunc : public MyFunc<decltype(&F::operator())>
@@ -42,42 +44,50 @@ public:
 		void *function;
 		const std::type_info *signature;
 	};
-public:
-	void clearSubscriptions()
-	{
-		for (auto &e : _callbacks)
-		{
-			delete static_cast<std::function<void()>*>(e.second.function);
-		}
-		_callbacks.clear();
-	}
 
-	static void clearAll()
+private:
+
+	// manager class
+	//
+	//
+
+	class Manager
 	{
-		for (auto &e : _allCallbacks)
+	public:
+		std::map<PubSubKey, std::unordered_set<PubSub*> > collection;
+		static Manager           &getInstance()
 		{
-			for (auto &o : e.second)
+			static Manager *instance = nullptr;
+			if (instance == nullptr)
 			{
-				o->clearSubscriptions();
+				instance = new Manager();
 			}
-			e.second.clear();
+			return (*instance);
 		}
-	}
+	private:
+		Manager(){}
+		~Manager(){}
+	};
 
+	//
+	//
+	// End of manager class
+
+public:
 	template <typename F>
-	void sub(const std::string &key, F lambda)
+	void sub(const PubSubKey &key, F lambda)
 	{
 		if (_callbacks.find(key) != std::end(_callbacks))
 			return;
 		auto fn = new decltype(toFn(lambda))(toFn(lambda));
 		_callbacks[key].function = static_cast<void*>(fn);
 		_callbacks[key].signature = &typeid(fn);
-		if (_allCallbacks.find(key) == std::end(_allCallbacks))
-			_allCallbacks.emplace(key, std::unordered_set<PubSub*>());
-		_allCallbacks[key].insert(this);
+		if (_manager.collection.find(key) == std::end(_manager.collection))
+			_manager.collection.emplace(key, std::unordered_set<PubSub*>());
+		_manager.collection[key].insert(this);
 	}
 
-	void unsub(const std::string &key)
+	void unsub(const PubSubKey &key)
 	{
 		if (_callbacks.find(key) != std::end(_callbacks))
 		{
@@ -87,8 +97,18 @@ public:
 		removeFromGlobalCallbacks(key);
 	}
 
+	void unsubAll()
+	{
+		removeFromGlobalCallbacks();
+		for (auto &e : _callbacks)
+		{
+			delete static_cast<std::function<void()>*>(e.second.function);
+		}
+		_callbacks.clear();
+	}
+
 	template <typename ...Args>
-	void pub(std::string name, Args ...args)
+	void call(PubSubKey name, Args ...args)
 	{
 		auto callback = _callbacks.at(name);
 		auto function = static_cast<std::function<void(Args...)>*>(callback.function);
@@ -102,46 +122,71 @@ public:
 	}
 
 	template <typename ...Args>
-	static void broadcast(std::string name, Args ...args)
+	static void pub(PubSubKey name, Args ...args)
 	{
-		auto set = _allCallbacks.find(name);
-		if (set == std::end(_allCallbacks) || set->second.empty())
+		auto &col = Manager::getInstance().collection;
+		auto set = col.find(name);
+		if (set == std::end(col) || set->second.empty())
 			return;
 		for (auto it = std::begin(set->second); it != std::end(set->second); )
 		{
 			auto e = *it;
 			++it;
-			e->pub(name, args...);
+			e->call(name, args...);
 		}
 	}
 
-	PubSub(){}
-	virtual ~PubSub()
+	static void clearAll()
 	{
-		removeFromGlobalCallbacks();
-		clearSubscriptions();
+		auto &col = Manager::getInstance().collection;
+		for (auto &e : col)
+		{
+			for (auto &o : e.second)
+			{
+				o->_unsubAll();
+			}
+			e.second.clear();
+		}
 	}
 
-	static std::map<std::string, std::unordered_set<PubSub*> > _allCallbacks;
+	PubSub()
+		: _manager(Manager::getInstance())
+	{}
+
+	virtual ~PubSub()
+	{
+		unsubAll();
+	}
 private:
 	void removeFromGlobalCallbacks()
 	{
 		for (auto &e : _callbacks)
 		{
-			if (_allCallbacks.find(e.first) == std::end(_allCallbacks))
+			if (_manager.collection.find(e.first) == std::end(_manager.collection))
 				continue;
-			_allCallbacks[e.first].erase(this);
+			_manager.collection[e.first].erase(this);
 		}
 	}
 
-	void removeFromGlobalCallbacks(const std::string &key)
+	void removeFromGlobalCallbacks(const PubSubKey &key)
 	{
-		if (_allCallbacks.find(key) == std::end(_allCallbacks))
+		if (_manager.collection.find(key) == std::end(_manager.collection))
 			return;
-		_allCallbacks[key].erase(this);
+		_manager.collection[key].erase(this);
 
 	}
-	std::map<std::string, Callback> _callbacks;
+
+	void _unsubAll()
+	{
+		for (auto &e : _callbacks)
+		{
+			delete static_cast<std::function<void()>*>(e.second.function);
+		}
+		_callbacks.clear();
+	}
+
+	std::map<PubSubKey, Callback> _callbacks;
+	Manager &_manager;
 };
 
 #endif    //__PUBSUB_HPP__
